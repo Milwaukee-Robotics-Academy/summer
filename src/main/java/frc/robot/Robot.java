@@ -5,6 +5,8 @@
 package frc.robot;
 
 import com.kauailabs.navx.frc.AHRS;
+
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.SPI;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
@@ -15,6 +17,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * This is a demo program showing the use of the DifferentialDrive class. Runs the motors with
@@ -40,6 +43,11 @@ public class Robot extends TimedRobot {
     m_leftMotor.setIdleMode(IdleMode.kBrake);
     m_rightMotor.setIdleMode(IdleMode.kBrake);
     m_rightMotor.setInverted(true);
+
+    double conversionFactor = 0.1524 * Math.PI * 10.71;
+    m_leftEncoder.setPositionConversionFactor(conversionFactor);
+    m_rightEncoder.setPositionConversionFactor(conversionFactor);
+    
   }
 
   @Override
@@ -54,6 +62,12 @@ public class Robot extends TimedRobot {
     // That means that the Y axis drives forward
     // and backward, and the X turns left and right.
     m_robotDrive.arcadeDrive(m_stick.getRightTriggerAxis() - m_stick.getLeftTriggerAxis(), -m_stick.getLeftX());
+    
+    SmartDashboard.putNumber("Left Encoder", Units.metersToInches(m_leftEncoder.getPosition()));
+    SmartDashboard.putNumber("Right Encoder", Units.metersToInches(m_rightEncoder.getPosition()));
+    SmartDashboard.putNumber("Average Distance", Units.metersToInches((m_rightEncoder.getPosition()+m_leftEncoder.getPosition())/2));
+    SmartDashboard.putData("Gyro", gyro);
+
   }
 
   @Override
