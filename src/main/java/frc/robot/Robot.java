@@ -25,18 +25,20 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class Robot extends TimedRobot {
   private final CANSparkMax m_leftMotor = new CANSparkMax(1, MotorType.kBrushless);
-  private final RelativeEncoder m_leftEncoder = m_leftMotor.getEncoder(SparkMaxRelativeEncoder.Type.kQuadrature, 4096);
+  private RelativeEncoder m_leftEncoder;
   private final CANSparkMax m_rightMotor = new CANSparkMax(2, MotorType.kBrushless);
-  private final RelativeEncoder m_rightEncoder = m_rightMotor.getEncoder(SparkMaxRelativeEncoder.Type.kQuadrature, 4096);
+  private RelativeEncoder m_rightEncoder;
   private final DifferentialDrive m_robotDrive = new DifferentialDrive(m_leftMotor, m_rightMotor);
   private final XboxController m_stick = new XboxController(0);
-  private final AHRS gyro =  new AHRS(SPI.Port.kMXP);
+  private AHRS gyro;
 
   @Override
   public void robotInit() {
     // We need to invert one side of the drivetrain so that positive voltages
     // result in both sides moving forward. Depending on how your robot's
     // gearbox is constructed, you might have to invert the left side instead.
+
+    //gyro =  new AHRS(SPI.Port.kMXP);
 
     m_leftMotor.restoreFactoryDefaults();
     m_rightMotor.restoreFactoryDefaults();
@@ -45,8 +47,10 @@ public class Robot extends TimedRobot {
     m_rightMotor.setInverted(true);
 
     double conversionFactor = 0.1524 * Math.PI * 10.71;
-    m_leftEncoder.setPositionConversionFactor(conversionFactor);
-    m_rightEncoder.setPositionConversionFactor(conversionFactor);
+    // m_leftEncoder = m_leftMotor.getEncoder(SparkMaxRelativeEncoder.Type.kQuadrature, 4096);
+    // m_leftEncoder.setPositionConversionFactor(conversionFactor);
+    // m_rightEncoder = m_rightMotor.getEncoder(SparkMaxRelativeEncoder.Type.kQuadrature, 4096);
+    // m_rightEncoder.setPositionConversionFactor(conversionFactor);
     
   }
 
@@ -63,10 +67,10 @@ public class Robot extends TimedRobot {
     // and backward, and the X turns left and right.
     m_robotDrive.arcadeDrive(m_stick.getRightTriggerAxis() - m_stick.getLeftTriggerAxis(), -m_stick.getLeftX());
     
-    SmartDashboard.putNumber("Left Encoder", Units.metersToInches(m_leftEncoder.getPosition()));
-    SmartDashboard.putNumber("Right Encoder", Units.metersToInches(m_rightEncoder.getPosition()));
-    SmartDashboard.putNumber("Average Distance", Units.metersToInches((m_rightEncoder.getPosition()+m_leftEncoder.getPosition())/2));
-    SmartDashboard.putData("Gyro", gyro);
+    // SmartDashboard.putNumber("Left Encoder", Units.metersToInches(m_leftEncoder.getPosition()));
+    // SmartDashboard.putNumber("Right Encoder", Units.metersToInches(m_rightEncoder.getPosition()));
+    // SmartDashboard.putNumber("Average Distance", Units.metersToInches((m_rightEncoder.getPosition()+m_leftEncoder.getPosition())/2));
+    //SmartDashboard.putData("Gyro", gyro);
 
   }
 
