@@ -94,6 +94,8 @@ public class Robot extends TimedRobot {
     if (autoTimer.get() < 5) {
       if (getAverageDistanceInInches() > 24) {
         m_robotDrive.tankDrive(0.5, 0.5);
+      } else {
+        m_robotDrive.tankDrive(0.0, 0.0);
       }
     }
   }
