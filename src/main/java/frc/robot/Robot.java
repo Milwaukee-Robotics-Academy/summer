@@ -15,22 +15,25 @@ import com.revrobotics.SparkMaxRelativeEncoder;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
- * This is a demo program showing the use of the DifferentialDrive class. Runs the motors with
+ * This is a demo program showing the use of the DifferentialDrive class. Runs
+ * the motors with
  * arcade steering.
  */
 public class Robot extends TimedRobot {
-  private final CANSparkMax m_leftMotor = new CANSparkMax(1, MotorType.kBrushless);
+  private CANSparkMax m_leftMotor = new CANSparkMax(1, MotorType.kBrushless);
   private RelativeEncoder m_leftEncoder;
-  private final CANSparkMax m_rightMotor = new CANSparkMax(2, MotorType.kBrushless);
+  private CANSparkMax m_rightMotor = new CANSparkMax(2, MotorType.kBrushless);
   private RelativeEncoder m_rightEncoder;
-  private final DifferentialDrive m_robotDrive = new DifferentialDrive(m_leftMotor, m_rightMotor);
-  private final XboxController m_stick = new XboxController(0);
+  private DifferentialDrive m_robotDrive = new DifferentialDrive(m_leftMotor, m_rightMotor);
+  private XboxController m_stick = new XboxController(0);
   private AHRS gyro;
+  private Timer autoTimer = new Timer();
 
   @Override
   public void robotInit() {
@@ -38,7 +41,7 @@ public class Robot extends TimedRobot {
     // result in both sides moving forward. Depending on how your robot's
     // gearbox is constructed, you might have to invert the left side instead.
 
-    //gyro =  new AHRS(SPI.Port.kMXP);
+    // gyro = new AHRS(SPI.Port.kMXP);
 
     m_leftMotor.restoreFactoryDefaults();
     m_rightMotor.restoreFactoryDefaults();
@@ -47,11 +50,11 @@ public class Robot extends TimedRobot {
     m_rightMotor.setInverted(true);
 
     double conversionFactor = 0.1524 * Math.PI * 10.71;
-    // m_leftEncoder = m_leftMotor.getEncoder(SparkMaxRelativeEncoder.Type.kQuadrature, 4096);
-    // m_leftEncoder.setPositionConversionFactor(conversionFactor);
-    // m_rightEncoder = m_rightMotor.getEncoder(SparkMaxRelativeEncoder.Type.kQuadrature, 4096);
-    // m_rightEncoder.setPositionConversionFactor(conversionFactor);
-    
+    m_leftEncoder = m_leftMotor.getEncoder(SparkMaxRelativeEncoder.Type.kQuadrature, 4096);
+    m_leftEncoder.setPositionConversionFactor(conversionFactor);
+    m_rightEncoder = m_rightMotor.getEncoder(SparkMaxRelativeEncoder.Type.kQuadrature, 4096);
+    m_rightEncoder.setPositionConversionFactor(conversionFactor);
+
   }
 
   @Override
@@ -66,18 +69,39 @@ public class Robot extends TimedRobot {
     // That means that the Y axis drives forward
     // and backward, and the X turns left and right.
     m_robotDrive.arcadeDrive(m_stick.getRightTriggerAxis() - m_stick.getLeftTriggerAxis(), -m_stick.getLeftX());
-    
-    // SmartDashboard.putNumber("Left Encoder", Units.metersToInches(m_leftEncoder.getPosition()));
-    // SmartDashboard.putNumber("Right Encoder", Units.metersToInches(m_rightEncoder.getPosition()));
-    // SmartDashboard.putNumber("Average Distance", Units.metersToInches((m_rightEncoder.getPosition()+m_leftEncoder.getPosition())/2));
-    //SmartDashboard.putData("Gyro", gyro);
 
+    SmartDashboard.putNumber("Left Encoder", Units.metersToInches(m_leftEncoder.getPosition()));
+    SmartDashboard.putNumber("Right Encoder", Units.metersToInches(m_rightEncoder.getPosition()));
+    SmartDashboard.putNumber("Average Distance", getAverageDistanceInInches());
+    // SmartDashboard.putData("Gyro", gyro);
+
+  }
+
+  double getAverageDistanceInInches() {
+    return Units.metersToInches((m_rightEncoder.getPosition() + m_leftEncoder.getPosition()) / 2);
+  }
+
+  public void autonomousInit() {
+
+    autoTimer.reset();
+    autoTimer.start();
+    // ahrs.reset();
+  }
+
+  /** This function is called periodically during autonomous. */
+  @Override
+  public void autonomousPeriodic() {
+    if (autoTimer.get() < 5) {
+      if (getAverageDistanceInInches() > 24) {
+        m_robotDrive.tankDrive(0.5, 0.5);
+      }
+    }
   }
 
   @Override
   public void disabledPeriodic() {
     m_leftMotor.setIdleMode(IdleMode.kCoast);
     m_rightMotor.setIdleMode(IdleMode.kCoast);
-    
+
   }
 }
