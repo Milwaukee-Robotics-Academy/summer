@@ -35,6 +35,12 @@ public class Robot extends TimedRobot {
   private AHRS gyro;
   private Timer autoTimer = new Timer();
 
+
+  /**
+   * This function is run when the robot is first started up and should be used
+   * for any
+   * initialization code.
+   */
   @Override
   public void robotInit() {
     // We need to invert one side of the drivetrain so that positive voltages
@@ -57,24 +63,40 @@ public class Robot extends TimedRobot {
 
   }
 
+   /**
+   * This function is called every robot packet, no matter the mode. Use this for
+   * items like
+   * diagnostics that you want ran during disabled, autonomous, teleoperated and
+   * test.
+   *
+   * <p>
+   * This runs after the mode specific periodic functions, but before LiveWindow
+   * and
+   * SmartDashboard integrated updating.
+   */
+  @Override
+  public void robotPeriodic() {
+    SmartDashboard.putNumber("Left Encoder", Units.metersToInches(m_leftEncoder.getPosition()));
+    SmartDashboard.putNumber("Right Encoder", Units.metersToInches(m_rightEncoder.getPosition()));
+    SmartDashboard.putNumber("Average Distance", getAverageDistanceInInches());
+    // SmartDashboard.putData("Gyro", gyro);
+  }
+
+
+
   @Override
   public void teleopInit() {
     m_leftMotor.setIdleMode(IdleMode.kBrake);
     m_rightMotor.setIdleMode(IdleMode.kBrake);
   }
 
+   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
     // Drive with arcade drive.
     // That means that the Y axis drives forward
     // and backward, and the X turns left and right.
     m_robotDrive.arcadeDrive(m_stick.getRightTriggerAxis() - m_stick.getLeftTriggerAxis(), -m_stick.getLeftX());
-
-    SmartDashboard.putNumber("Left Encoder", Units.metersToInches(m_leftEncoder.getPosition()));
-    SmartDashboard.putNumber("Right Encoder", Units.metersToInches(m_rightEncoder.getPosition()));
-    SmartDashboard.putNumber("Average Distance", getAverageDistanceInInches());
-    // SmartDashboard.putData("Gyro", gyro);
-
   }
 
   double getAverageDistanceInInches() {
