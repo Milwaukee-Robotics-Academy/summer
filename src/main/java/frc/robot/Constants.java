@@ -16,17 +16,21 @@ import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
  */
 public final class Constants {
   public static final class DriveConstants {
-    public static final int kLeftMotorID = 0;
-    public static final int kRightMotorID = 1;
+    public static final int kLeftMotorID = 1;
+    public static final int kRightMotorID = 2;
 
-    public static final double kS = 0;
-    public static final double kV = 0;
-    public static final double kA = 0;
+  //  public static final double kP = 0.39775;
+
+    public static final double kP = 0.0009;
+
+    public static final double kS = 0.11673;
+    public static final double kV = 1.3815;
+    public static final double kA = 0.12011;
     
     public static final boolean kLeftEncoderReversed = false;
     public static final boolean kRightEncoderReversed = true;
 
-    public static final double kTrackwidthMeters = 0.69;
+    public static final double kTrackwidthMeters = 0.66;
     public static final DifferentialDriveKinematics kDriveKinematics =
         new DifferentialDriveKinematics(kTrackwidthMeters);
 

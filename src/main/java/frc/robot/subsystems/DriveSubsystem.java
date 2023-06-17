@@ -11,6 +11,8 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import edu.wpi.first.wpilibj.SPI;
+
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.RamseteController;
@@ -51,11 +53,15 @@ new DifferentialDriveKinematics(Units.inchesToMeters(27.0));
 
   /** Creates a new DriveSubsystem. */
   public DriveSubsystem() {
+    m_gyro =  new AHRS(SPI.Port.kMXP);
     m_leftMotor.restoreFactoryDefaults();
     m_rightMotor.restoreFactoryDefaults();
     m_leftMotor.setIdleMode(IdleMode.kBrake);
     m_rightMotor.setIdleMode(IdleMode.kBrake);
     m_rightMotor.setInverted(true);
+
+    m_rightMotor.setOpenLoopRampRate(0.4);
+    m_leftMotor.setOpenLoopRampRate(0.4);
   
     double conversionFactor = 0.1524 * Math.PI /10.71;
     m_leftEncoder = m_leftMotor.getEncoder();
@@ -209,8 +215,8 @@ new DifferentialDriveKinematics(Units.inchesToMeters(27.0));
             new SimpleMotorFeedforward(Constants.DriveConstants.kS, Constants.DriveConstants.kV, Constants.DriveConstants.kA),
             Constants.DriveConstants.kDriveKinematics, // DifferentialDriveKinematics
             this::getWheelSpeeds, // DifferentialDriveWheelSpeeds supplier
-            new PIDController(0, 0, 0), // Left controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
-            new PIDController(0, 0, 0), // Right controller (usually the same values as left controller)
+            new PIDController(Constants.DriveConstants.kP, 0, 0), // Left controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
+            new PIDController(Constants.DriveConstants.kP, 0, 0), // Right controller (usually the same values as left controller)
             this::tankDriveVolts, // Voltage biconsumer
             true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
             this // Requires this drive subsystem
