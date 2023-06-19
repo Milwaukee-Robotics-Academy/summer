@@ -4,80 +4,99 @@
 
 package frc.robot;
 
-import com.kauailabs.navx.frc.AHRS;
-
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.SPI;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.CANSparkMax.IdleMode;
-import com.revrobotics.SparkMaxRelativeEncoder;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 /**
- * This is a demo program showing the use of the DifferentialDrive class. Runs the motors with
- * arcade steering.
+ * The VM is configured to automatically run this class, and to call the functions corresponding to
+ * each mode, as described in the TimedRobot documentation. If you change the name of this class or
+ * the package after creating this project, you must also update the build.gradle file in the
+ * project.
  */
 public class Robot extends TimedRobot {
-  private final CANSparkMax m_leftMotor = new CANSparkMax(1, MotorType.kBrushless);
-  private RelativeEncoder m_leftEncoder;
-  private final CANSparkMax m_rightMotor = new CANSparkMax(2, MotorType.kBrushless);
-  private RelativeEncoder m_rightEncoder;
-  private final DifferentialDrive m_robotDrive = new DifferentialDrive(m_leftMotor, m_rightMotor);
-  private final XboxController m_stick = new XboxController(0);
-  private AHRS gyro;
+  private Command m_autonomousCommand;
 
+  private RobotContainer m_robotContainer;
+
+  /**
+   * This function is run when the robot is first started up and should be used for any
+   * initialization code.
+   */
   @Override
   public void robotInit() {
-    // We need to invert one side of the drivetrain so that positive voltages
-    // result in both sides moving forward. Depending on how your robot's
-    // gearbox is constructed, you might have to invert the left side instead.
-
-    //gyro =  new AHRS(SPI.Port.kMXP);
-
-    m_leftMotor.restoreFactoryDefaults();
-    m_rightMotor.restoreFactoryDefaults();
-    m_leftMotor.setIdleMode(IdleMode.kBrake);
-    m_rightMotor.setIdleMode(IdleMode.kBrake);
-    m_rightMotor.setInverted(true);
-
-    double conversionFactor = 0.1524 * Math.PI * 10.71;
-    // m_leftEncoder = m_leftMotor.getEncoder(SparkMaxRelativeEncoder.Type.kQuadrature, 4096);
-    // m_leftEncoder.setPositionConversionFactor(conversionFactor);
-    // m_rightEncoder = m_rightMotor.getEncoder(SparkMaxRelativeEncoder.Type.kQuadrature, 4096);
-    // m_rightEncoder.setPositionConversionFactor(conversionFactor);
-    
+    // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
+    // autonomous chooser on the dashboard.
+    m_robotContainer = new RobotContainer();
   }
+
+  /**
+   * This function is called every 20 ms, no matter the mode. Use this for items like diagnostics
+   * that you want ran during disabled, autonomous, teleoperated and test.
+   *
+   * <p>This runs after the mode specific periodic functions, but before LiveWindow and
+   * SmartDashboard integrated updating.
+   */
+  @Override
+  public void robotPeriodic() {
+    // Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
+    // commands, running already-scheduled commands, removing finished or interrupted commands,
+    // and running subsystem periodic() methods.  This must be called from the robot's periodic
+    // block in order for anything in the Command-based framework to work.
+    CommandScheduler.getInstance().run();
+  }
+
+  /** This function is called once each time the robot enters Disabled mode. */
+  @Override
+  public void disabledInit() {}
+
+  @Override
+  public void disabledPeriodic() {}
+
+  /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
+  @Override
+  public void autonomousInit() {
+    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+
+    /*
+     * String autoSelected = SmartDashboard.getString("Auto Selector",
+     * "Default"); switch(autoSelected) { case "My Auto": autonomousCommand
+     * = new MyAutoCommand(); break; case "Default Auto": default:
+     * autonomousCommand = new ExampleCommand(); break; }
+     */
+
+    // schedule the autonomous command (example)
+    if (m_autonomousCommand != null) {
+      m_autonomousCommand.schedule();
+    }
+  }
+
+  /** This function is called periodically during autonomous. */
+  @Override
+  public void autonomousPeriodic() {}
 
   @Override
   public void teleopInit() {
-    m_leftMotor.setIdleMode(IdleMode.kBrake);
-    m_rightMotor.setIdleMode(IdleMode.kBrake);
+    // This makes sure that the autonomous stops running when
+    // teleop starts running. If you want the autonomous to
+    // continue until interrupted by another command, remove
+    // this line or comment it out.
+    if (m_autonomousCommand != null) {
+      m_autonomousCommand.cancel();
+    }
   }
+
+  /** This function is called periodically during operator control. */
+  @Override
+  public void teleopPeriodic() {}
 
   @Override
-  public void teleopPeriodic() {
-    // Drive with arcade drive.
-    // That means that the Y axis drives forward
-    // and backward, and the X turns left and right.
-    m_robotDrive.arcadeDrive(m_stick.getRightTriggerAxis() - m_stick.getLeftTriggerAxis(), -m_stick.getLeftX());
-    
-    // SmartDashboard.putNumber("Left Encoder", Units.metersToInches(m_leftEncoder.getPosition()));
-    // SmartDashboard.putNumber("Right Encoder", Units.metersToInches(m_rightEncoder.getPosition()));
-    // SmartDashboard.putNumber("Average Distance", Units.metersToInches((m_rightEncoder.getPosition()+m_leftEncoder.getPosition())/2));
-    //SmartDashboard.putData("Gyro", gyro);
-
+  public void testInit() {
+    // Cancels all running commands at the start of test mode.
+    CommandScheduler.getInstance().cancelAll();
   }
 
+  /** This function is called periodically during test mode. */
   @Override
-  public void disabledPeriodic() {
-    m_leftMotor.setIdleMode(IdleMode.kCoast);
-    m_rightMotor.setIdleMode(IdleMode.kCoast);
-    
-  }
+  public void testPeriodic() {}
 }
