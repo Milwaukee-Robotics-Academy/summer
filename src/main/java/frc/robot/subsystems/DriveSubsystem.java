@@ -209,14 +209,14 @@ new DifferentialDriveKinematics(Units.inchesToMeters(27.0));
           }
         }),
         new PPRamseteCommand(
-            traj, 
+            traj,  
             this::getPose, // Pose supplier
             new RamseteController(),
             new SimpleMotorFeedforward(Constants.DriveConstants.kS, Constants.DriveConstants.kV, Constants.DriveConstants.kA),
             Constants.DriveConstants.kDriveKinematics, // DifferentialDriveKinematics
             this::getWheelSpeeds, // DifferentialDriveWheelSpeeds supplier
-            new PIDController(Constants.DriveConstants.kP, 0, 0), // Left controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
-            new PIDController(Constants.DriveConstants.kP, 0, 0), // Right controller (usually the same values as left controller)
+            new PIDController(Constants.DriveConstants.kP, 0, Constants.DriveConstants.kD), // Left controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
+            new PIDController(Constants.DriveConstants.kP, 0,Constants.DriveConstants.kD), // Right controller (usually the same values as left controller)
             this::tankDriveVolts, // Voltage biconsumer
             true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
             this // Requires this drive subsystem

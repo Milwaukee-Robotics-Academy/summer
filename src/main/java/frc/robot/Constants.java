@@ -19,9 +19,11 @@ public final class Constants {
     public static final int kLeftMotorID = 1;
     public static final int kRightMotorID = 2;
 
-  //  public static final double kP = 0.39775;
+    public static final double kP =0.0003191;
+   //= public static final double kD =0.00021197;
+   public static final double kD =0.0;
 
-    public static final double kP = 0.0009;
+  //  public static final double kP = 0.0009;
 
     public static final double kS = 0.11673;
     public static final double kV = 1.3815;
