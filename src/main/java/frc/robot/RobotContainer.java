@@ -83,4 +83,12 @@ public class RobotContainer {
         // Run path following command, then stop at the end.
         return m_robotDrive.followTrajectoryCommand(examplePath, true).andThen(() -> m_robotDrive.tankDriveVolts(0, 0));
     }
+
+    public void autonomousInit(){
+        m_robotDrive.resetEncoders();
+    }
+
+    public void teleopInit(){
+        m_robotDrive.resetEncoders();
+    }
 }
