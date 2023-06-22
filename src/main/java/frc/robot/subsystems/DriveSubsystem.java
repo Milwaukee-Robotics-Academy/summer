@@ -13,7 +13,6 @@ import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.wpilibj.SPI;
 
-
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.RamseteController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
@@ -23,6 +22,7 @@ import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -37,23 +37,18 @@ public class DriveSubsystem extends SubsystemBase {
   private RelativeEncoder m_rightEncoder;
   private AHRS m_gyro;
 
-
   // The robot's drive
   private final DifferentialDrive m_drive = new DifferentialDrive(m_leftMotor, m_rightMotor);
-
 
   // Odometry class for tracking robot pose
   private final DifferentialDriveOdometry m_odometry;
 
   // Creating my kinematics object: track width of 27 inches
-DifferentialDriveKinematics kinematics =
-new DifferentialDriveKinematics(Units.inchesToMeters(27.0));
-
-
+  DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(Units.inchesToMeters(27.0));
 
   /** Creates a new DriveSubsystem. */
   public DriveSubsystem() {
-    m_gyro =  new AHRS(SPI.Port.kMXP);
+    m_gyro = new AHRS(SPI.Port.kMXP);
     m_leftMotor.restoreFactoryDefaults();
     m_rightMotor.restoreFactoryDefaults();
     m_leftMotor.setIdleMode(IdleMode.kBrake);
@@ -62,19 +57,16 @@ new DifferentialDriveKinematics(Units.inchesToMeters(27.0));
 
     m_rightMotor.setOpenLoopRampRate(0.4);
     m_leftMotor.setOpenLoopRampRate(0.4);
-  
-    double conversionFactor = 0.1524 * Math.PI /10.71;
+
+    double conversionFactor = 0.1524 * Math.PI / 10.71;
     m_leftEncoder = m_leftMotor.getEncoder();
     m_leftEncoder.setPositionConversionFactor(conversionFactor);
     m_rightEncoder = m_rightMotor.getEncoder();
     m_rightEncoder.setPositionConversionFactor(conversionFactor);
-  
-  
 
     resetEncoders();
-    m_odometry =
-        new DifferentialDriveOdometry(
-            m_gyro.getRotation2d(), m_leftEncoder.getPosition(), m_rightEncoder.getPosition());
+    m_odometry = new DifferentialDriveOdometry(
+        m_gyro.getRotation2d(), m_leftEncoder.getPosition(), m_rightEncoder.getPosition());
   }
 
   @Override
@@ -82,6 +74,11 @@ new DifferentialDriveKinematics(Units.inchesToMeters(27.0));
     // Update the odometry in the periodic block
     m_odometry.update(
         m_gyro.getRotation2d(), m_leftEncoder.getPosition(), m_rightEncoder.getPosition());
+    SmartDashboard.putNumber("Left Encoder", Units.metersToInches(m_leftEncoder.getPosition()));
+    SmartDashboard.putNumber("Right Encoder", Units.metersToInches(m_rightEncoder.getPosition()));
+    SmartDashboard.putNumber("Average Distance",
+        Units.metersToInches((m_rightEncoder.getPosition() + m_leftEncoder.getPosition()) / 2));
+    SmartDashboard.putData("Gyro", m_gyro);
   }
 
   /**
@@ -109,6 +106,7 @@ new DifferentialDriveKinematics(Units.inchesToMeters(27.0));
    */
   public void resetOdometry(Pose2d pose) {
     resetEncoders();
+    zeroHeading();
     m_odometry.resetPosition(
         m_gyro.getRotation2d(), m_leftEncoder.getPosition(), m_rightEncoder.getPosition(), pose);
   }
@@ -126,7 +124,7 @@ new DifferentialDriveKinematics(Units.inchesToMeters(27.0));
   /**
    * Controls the left and right sides of the drive directly with voltages.
    *
-   * @param leftVolts the commanded left output
+   * @param leftVolts  the commanded left output
    * @param rightVolts the commanded right output
    */
   public void tankDriveVolts(double leftVolts, double rightVolts) {
@@ -169,7 +167,8 @@ new DifferentialDriveKinematics(Units.inchesToMeters(27.0));
   }
 
   /**
-   * Sets the max output of the drive. Useful for scaling the drive to drive more slowly.
+   * Sets the max output of the drive. Useful for scaling the drive to drive more
+   * slowly.
    *
    * @param maxOutput the maximum output to which the drive will be constrained
    */
@@ -204,23 +203,30 @@ new DifferentialDriveKinematics(Units.inchesToMeters(27.0));
     return new SequentialCommandGroup(
         new InstantCommand(() -> {
           // Reset odometry for the first path you run during auto
-          if(isFirstPath){
-              this.resetOdometry(traj.getInitialPose());
+          if (isFirstPath) {
+            this.resetOdometry(traj.getInitialPose());
           }
         }),
         new PPRamseteCommand(
-            traj,  
+            traj,
             this::getPose, // Pose supplier
             new RamseteController(),
-            new SimpleMotorFeedforward(Constants.DriveConstants.kS, Constants.DriveConstants.kV, Constants.DriveConstants.kA),
+            new SimpleMotorFeedforward(Constants.DriveConstants.kS, Constants.DriveConstants.kV,
+                Constants.DriveConstants.kA),
             Constants.DriveConstants.kDriveKinematics, // DifferentialDriveKinematics
             this::getWheelSpeeds, // DifferentialDriveWheelSpeeds supplier
-            new PIDController(Constants.DriveConstants.kP, 0, Constants.DriveConstants.kD), // Left controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
-            new PIDController(Constants.DriveConstants.kP, 0,Constants.DriveConstants.kD), // Right controller (usually the same values as left controller)
+            new PIDController(Constants.DriveConstants.kP, 0, Constants.DriveConstants.kD), // Left controller. Tune
+                                                                                            // these values for your
+                                                                                            // robot. Leaving them 0
+                                                                                            // will only use
+                                                                                            // feedforwards.
+            new PIDController(Constants.DriveConstants.kP, 0, Constants.DriveConstants.kD), // Right controller (usually
+                                                                                            // the same values as left
+                                                                                            // controller)
             this::tankDriveVolts, // Voltage biconsumer
-            true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
+            true, // Should the path be automatically mirrored depending on alliance color.
+                  // Optional, defaults to true
             this // Requires this drive subsystem
-        )
-    );
-}
+        ));
+  }
 }
