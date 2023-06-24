@@ -137,6 +137,7 @@ public class DriveSubsystem extends SubsystemBase {
   public void resetEncoders() {
     m_leftEncoder.setPosition(0.0);
     m_rightEncoder.setPosition(0.0);
+    m_gyro.reset();
   }
 
   /**
