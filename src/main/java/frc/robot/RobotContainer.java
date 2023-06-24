@@ -9,6 +9,7 @@ import static edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.Constants.OIConstants;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.Intake;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -29,10 +30,13 @@ import com.pathplanner.lib.PathPlannerTrajectory;
 public class RobotContainer {
     // The robot's subsystems
     private final DriveSubsystem m_robotDrive = new DriveSubsystem();
+    private final Intake m_intake = new Intake();
 
     // The driver's controller
     XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
+    private final JoystickButton intakeIn = new JoystickButton(m_driverController, XboxController.Button.kX.value);
 
+    private final JoystickButton intakeOut = new JoystickButton(m_driverController, XboxController.Button.kY.value);
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
@@ -49,6 +53,10 @@ public class RobotContainer {
                         () -> m_robotDrive.arcadeDrive(
                             m_driverController.getRightTriggerAxis() - m_driverController.getLeftTriggerAxis(), -m_driverController.getLeftX()),
                         m_robotDrive));
+        m_intake.setDefaultCommand(
+            new RunCommand(
+                () -> m_intake.stop() , m_intake)
+        );
     }
 
     /**
@@ -65,6 +73,9 @@ public class RobotContainer {
         new JoystickButton(m_driverController, Button.kRightBumper.value)
                 .onTrue(new InstantCommand(() -> m_robotDrive.setMaxOutput(0.5)))
                 .onFalse(new InstantCommand(() -> m_robotDrive.setMaxOutput(1)));
+        intakeIn.onTrue(new InstantCommand(() -> m_intake.in()));
+        intakeOut.onTrue(new InstantCommand(() -> m_intake.out()));
+        
     }
 
     /**
