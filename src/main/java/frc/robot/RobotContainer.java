@@ -17,6 +17,8 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.server.PathPlannerServer;
+
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -31,8 +33,7 @@ public class RobotContainer {
     // The robot's subsystems
     private final DriveSubsystem m_robotDrive = new DriveSubsystem();
     private final Intake m_intake = new Intake();
-
-    // The driver's controller
+      // The driver's controller
     XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
     private final JoystickButton intakeIn = new JoystickButton(m_driverController, XboxController.Button.kX.value);
 
@@ -96,6 +97,7 @@ public class RobotContainer {
     }
 
     public void autonomousInit(){
+        PathPlannerServer.startServer(5811);
         m_robotDrive.resetEncoders();
     }
 
