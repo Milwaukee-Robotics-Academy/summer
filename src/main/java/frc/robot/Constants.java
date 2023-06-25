@@ -19,11 +19,11 @@ public final class Constants {
     public static final int kLeftMotorID = 1;
     public static final int kRightMotorID = 2;
 
-    public static final double kP =0.0000003191;
-   //= public static final double kD =0.00021197;
-   public static final double kD =0.00009;
+    public static final double kP =0.003191;
+    public static final double kD =0.00021197;
 
-  //  public static final double kP = 0.0009;
+   //public static final double kP = 0.003191;
+   //public static final double kD = 0.00021197;
 
     public static final double kS = 0.11673;
     public static final double kV = 1.3815;
@@ -37,7 +37,7 @@ public final class Constants {
         new DifferentialDriveKinematics(kTrackwidthMeters);
 
     public static final int kEncoderCPR = 42;
-    public static final double kWheelDiameterMeters = 0.15;
+    public static final double kWheelDiameterMeters = 0.1524;
     public static final double kEncoderDistancePerPulse =
         // Assumes the encoders are directly mounted on the wheel shafts
         (kWheelDiameterMeters * Math.PI) / (double) kEncoderCPR;

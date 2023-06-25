@@ -22,6 +22,7 @@ import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -44,7 +45,8 @@ public class DriveSubsystem extends SubsystemBase {
   private final DifferentialDriveOdometry m_odometry;
 
   // Creating my kinematics object: track width of 27 inches
-  DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(Units.inchesToMeters(27.0));
+  DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(Constants.DriveConstants.kTrackwidthMeters);
+  private final Field2d m_field = new Field2d();
 
   /** Creates a new DriveSubsystem. */
   public DriveSubsystem() {
@@ -59,14 +61,19 @@ public class DriveSubsystem extends SubsystemBase {
     m_leftMotor.setOpenLoopRampRate(0.4);
 
     double conversionFactor = 0.1524 * Math.PI / 10.71;
+    //
+    double velocityConversionFactor = (1 / 60.0) * (0.1524 * 2 * Math.PI) / 10.71;
     m_leftEncoder = m_leftMotor.getEncoder();
     m_leftEncoder.setPositionConversionFactor(conversionFactor);
+    m_leftEncoder.setVelocityConversionFactor(velocityConversionFactor);
     m_rightEncoder = m_rightMotor.getEncoder();
     m_rightEncoder.setPositionConversionFactor(conversionFactor);
+    m_rightEncoder.setVelocityConversionFactor(velocityConversionFactor);
 
     resetEncoders();
     m_odometry = new DifferentialDriveOdometry(
         m_gyro.getRotation2d(), m_leftEncoder.getPosition(), m_rightEncoder.getPosition());
+    SmartDashboard.putData("Field", m_field);
   }
 
   @Override
@@ -74,11 +81,12 @@ public class DriveSubsystem extends SubsystemBase {
     // Update the odometry in the periodic block
     m_odometry.update(
         m_gyro.getRotation2d(), m_leftEncoder.getPosition(), m_rightEncoder.getPosition());
-    SmartDashboard.putNumber("Left Encoder", Units.metersToInches(m_leftEncoder.getPosition()));
-    SmartDashboard.putNumber("Right Encoder", Units.metersToInches(m_rightEncoder.getPosition()));
+    SmartDashboard.putNumber("Left Encoder",m_leftEncoder.getPosition()); // Units.metersToInches(m_leftEncoder.getPosition()));
+    SmartDashboard.putNumber("Right Encoder", m_rightEncoder.getPosition()); // Units.metersToInches(m_rightEncoder.getPosition()));
     SmartDashboard.putNumber("Average Distance",
         Units.metersToInches((m_rightEncoder.getPosition() + m_leftEncoder.getPosition()) / 2));
     SmartDashboard.putData("Gyro", m_gyro);
+    m_field.setRobotPose(m_odometry.getPoseMeters());
   }
 
   /**

@@ -51,12 +51,12 @@ public class RobotContainer {
                 // hand, and turning controlled by the right.
                 new RunCommand(
                         () -> m_robotDrive.arcadeDrive(
-                            m_driverController.getRightTriggerAxis() - m_driverController.getLeftTriggerAxis(), -m_driverController.getLeftX()),
+                            m_driverController.getRightTriggerAxis() - m_driverController.getLeftTriggerAxis(), -m_driverController.getLeftX()*.6),
                         m_robotDrive));
-        m_intake.setDefaultCommand(
-            new RunCommand(
-                () -> m_intake.stop() , m_intake)
-        );
+        // m_intake.setDefaultCommand(
+        //     new RunCommand(
+        //         () -> m_intake.stop() , m_intake)
+        // );
     }
 
     /**
@@ -73,8 +73,8 @@ public class RobotContainer {
         new JoystickButton(m_driverController, Button.kRightBumper.value)
                 .onTrue(new InstantCommand(() -> m_robotDrive.setMaxOutput(0.5)))
                 .onFalse(new InstantCommand(() -> m_robotDrive.setMaxOutput(1)));
-        intakeIn.onTrue(new InstantCommand(() -> m_intake.in()));
-        intakeOut.onTrue(new InstantCommand(() -> m_intake.out()));
+        // intakeIn.onTrue(new InstantCommand(() -> m_intake.in()));
+        // intakeOut.onTrue(new InstantCommand(() -> m_intake.out()));
         
     }
 
