@@ -8,6 +8,8 @@ import static edu.wpi.first.wpilibj.XboxController.Button;
 
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.Constants.OIConstants;
+import frc.robot.commands.IntakeIn;
+import frc.robot.commands.IntakeOut;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.Intake;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -74,8 +76,8 @@ public class RobotContainer {
         new JoystickButton(m_driverController, Button.kRightBumper.value)
                 .onTrue(new InstantCommand(() -> m_robotDrive.setMaxOutput(0.5)))
                 .onFalse(new InstantCommand(() -> m_robotDrive.setMaxOutput(1)));
-        intakeIn.onTrue(new InstantCommand(() -> m_intake.in()));
-        intakeOut.onTrue(new InstantCommand(() -> m_intake.out()));
+        intakeIn.whileTrue(new IntakeIn(m_intake));
+        intakeOut.whileTrue(new IntakeOut(m_intake));
         
     }
 
