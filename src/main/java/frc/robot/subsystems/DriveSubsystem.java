@@ -17,6 +17,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.RamseteController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
@@ -80,12 +81,13 @@ public class DriveSubsystem extends SubsystemBase {
   public void periodic() {
     // Update the odometry in the periodic block
     m_odometry.update(
-        m_gyro.getRotation2d(), m_leftEncoder.getPosition(), m_rightEncoder.getPosition());
+      getGyroRotation2d(), m_leftEncoder.getPosition(), m_rightEncoder.getPosition());
     SmartDashboard.putNumber("Left Encoder",m_leftEncoder.getPosition()); // Units.metersToInches(m_leftEncoder.getPosition()));
     SmartDashboard.putNumber("Right Encoder", m_rightEncoder.getPosition()); // Units.metersToInches(m_rightEncoder.getPosition()));
     SmartDashboard.putNumber("Average Distance",
         Units.metersToInches((m_rightEncoder.getPosition() + m_leftEncoder.getPosition()) / 2));
     SmartDashboard.putData("Gyro", m_gyro);
+    SmartDashboard.putNumber("Gyro.getHeading", this.getHeading());
     m_field.setRobotPose(m_odometry.getPoseMeters());
   }
 
@@ -116,7 +118,7 @@ public class DriveSubsystem extends SubsystemBase {
     resetEncoders();
     zeroHeading();
     m_odometry.resetPosition(
-        m_gyro.getRotation2d(), m_leftEncoder.getPosition(), m_rightEncoder.getPosition(), pose);
+      getGyroRotation2d(), m_leftEncoder.getPosition(), m_rightEncoder.getPosition(), pose);
   }
 
   /**
@@ -198,6 +200,10 @@ public class DriveSubsystem extends SubsystemBase {
   public double getHeading() {
     return m_gyro.getRotation2d().getDegrees();
   }
+
+  public Rotation2d getGyroRotation2d() {
+    return Rotation2d.fromDegrees(-m_gyro.getAngle());
+}
 
   /**
    * Returns the turn rate of the robot.
