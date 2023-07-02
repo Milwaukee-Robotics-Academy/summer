@@ -38,6 +38,7 @@ public class DriveSubsystem extends SubsystemBase {
   private CANSparkMax m_rightMotor = new CANSparkMax(2, MotorType.kBrushless);
   private RelativeEncoder m_rightEncoder;
   private AHRS m_gyro;
+  private Rotation2d m_gyroOffset = new Rotation2d();
 
   // The robot's drive
   private final DifferentialDrive m_drive = new DifferentialDrive(m_leftMotor, m_rightMotor);
@@ -146,7 +147,6 @@ public class DriveSubsystem extends SubsystemBase {
   public void resetEncoders() {
     m_leftEncoder.setPosition(0.0);
     m_rightEncoder.setPosition(0.0);
-    m_gyro.reset();
   }
 
   /**
@@ -189,20 +189,16 @@ public class DriveSubsystem extends SubsystemBase {
   /** Zeroes the heading of the robot. */
   public void zeroHeading(Rotation2d rotation) {
     m_gyro.zeroYaw();
-    m_gyro.setAngleAdjustment(rotation.getDegrees());
+    m_gyroOffset = rotation;
   }
 
   /**
    * Returns the heading of the robot.
    *
-   * @return the robot's heading in degrees, from -180 to 180
+   * @return the robot's heading
    */
-  public double getHeading() {
-    return -m_gyro.getYaw();
-  }
-
   public Rotation2d getGyroRotation2d() {
-    return Rotation2d.fromDegrees(-m_gyro.getYaw());
+    return Rotation2d.fromDegrees(360.0 - m_gyro.getYaw() * -1).minus(m_gyroOffset);
 }
 
   /**
