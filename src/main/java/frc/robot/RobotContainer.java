@@ -89,10 +89,11 @@ public class RobotContainer {
     public Command getAutonomousCommand() {
         // This will load the file "Example Path.path" and generate it with a max
         // velocity of 4 m/s and a max acceleration of 3 m/s^2
-        PathPlannerTrajectory examplePath = PathPlanner.loadPath("New Path", new PathConstraints(3, 2));
+        PathPlannerTrajectory examplePath = PathPlanner.loadPath("ReversePath", new PathConstraints(3, 2));
 
         // This trajectory can then be passed to a path follower such as a
         // PPRamseteCommand
+
 
         // Run path following command, then stop at the end.
         return new IntakeOut(m_intake).withTimeout(2).andThen(m_robotDrive.followTrajectoryCommand(examplePath, true).andThen(() -> m_robotDrive.tankDriveVolts(0, 0)));
