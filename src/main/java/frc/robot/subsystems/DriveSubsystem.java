@@ -87,7 +87,7 @@ public class DriveSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Average Distance",
         Units.metersToInches((m_rightEncoder.getPosition() + m_leftEncoder.getPosition()) / 2));
     SmartDashboard.putData("Gyro", m_gyro);
-    SmartDashboard.putNumber("Gyro.getHeading", this.getHeading());
+    SmartDashboard.putNumber("Gyro.getHeading", this.getGyroRotation2d().getDegrees());
     m_field.setRobotPose(m_odometry.getPoseMeters());
   }
 
