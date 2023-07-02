@@ -70,7 +70,6 @@ public class DriveSubsystem extends SubsystemBase {
     m_rightEncoder = m_rightMotor.getEncoder();
     m_rightEncoder.setPositionConversionFactor(conversionFactor);
     m_rightEncoder.setVelocityConversionFactor(velocityConversionFactor);
-
     resetEncoders();
     m_odometry = new DifferentialDriveOdometry(
         m_gyro.getRotation2d(), m_leftEncoder.getPosition(), m_rightEncoder.getPosition());
@@ -116,7 +115,7 @@ public class DriveSubsystem extends SubsystemBase {
    */
   public void resetOdometry(Pose2d pose) {
     resetEncoders();
-    zeroHeading();
+    zeroHeading(pose.getRotation());
     m_odometry.resetPosition(
       getGyroRotation2d(), m_leftEncoder.getPosition(), m_rightEncoder.getPosition(), pose);
   }
@@ -188,8 +187,9 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   /** Zeroes the heading of the robot. */
-  public void zeroHeading() {
-    m_gyro.reset();
+  public void zeroHeading(Rotation2d rotation) {
+    m_gyro.zeroYaw();
+    m_gyro.setAngleAdjustment(rotation.getDegrees());
   }
 
   /**
@@ -198,11 +198,11 @@ public class DriveSubsystem extends SubsystemBase {
    * @return the robot's heading in degrees, from -180 to 180
    */
   public double getHeading() {
-    return m_gyro.getRotation2d().getDegrees();
+    return -m_gyro.getYaw();
   }
 
   public Rotation2d getGyroRotation2d() {
-    return Rotation2d.fromDegrees(-m_gyro.getAngle());
+    return Rotation2d.fromDegrees(-m_gyro.getYaw());
 }
 
   /**

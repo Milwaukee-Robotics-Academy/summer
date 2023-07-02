@@ -40,10 +40,17 @@ public class RobotContainer {
     private final JoystickButton intakeIn = new JoystickButton(m_driverController, XboxController.Button.kX.value);
 
     private final JoystickButton intakeOut = new JoystickButton(m_driverController, XboxController.Button.kY.value);
+
+    private final PathPlannerTrajectory examplePath;
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
     public RobotContainer() {
+
+                // This will load the file "Example Path.path" and generate it with a max
+        // velocity of 4 m/s and a max acceleration of 3 m/s^2
+        examplePath = PathPlanner.loadPath("ExamplePath", new PathConstraints(3, 2));
+        m_robotDrive.resetOdometry(examplePath.getInitialPose());
         // Configure the button bindings
         configureButtonBindings();
 
@@ -87,9 +94,6 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        // This will load the file "Example Path.path" and generate it with a max
-        // velocity of 4 m/s and a max acceleration of 3 m/s^2
-        PathPlannerTrajectory examplePath = PathPlanner.loadPath("ReversePath", new PathConstraints(3, 2));
 
         // This trajectory can then be passed to a path follower such as a
         // PPRamseteCommand
