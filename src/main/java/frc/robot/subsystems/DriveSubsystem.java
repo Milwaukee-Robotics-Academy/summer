@@ -211,6 +211,7 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   public Command followTrajectoryCommand(PathPlannerTrajectory traj, boolean isFirstPath) {
+    SmartDashboard.putNumber("intial Pose rotation", traj.getInitialPose().getRotation().getDegrees());
     return new SequentialCommandGroup(
         new InstantCommand(() -> {
           // Reset odometry for the first path you run during auto
