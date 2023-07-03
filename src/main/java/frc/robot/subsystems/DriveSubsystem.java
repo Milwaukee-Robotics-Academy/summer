@@ -23,6 +23,10 @@ import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -45,6 +49,9 @@ public class DriveSubsystem extends SubsystemBase {
 
   // Odometry class for tracking robot pose
   private final DifferentialDriveOdometry m_odometry;
+
+  ShuffleboardTab fieldTab;
+  ShuffleboardTab gyroTab;
 
   // Creating my kinematics object: track width of 27 inches
   DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(Constants.DriveConstants.kTrackwidthMeters);
@@ -74,21 +81,32 @@ public class DriveSubsystem extends SubsystemBase {
     resetEncoders();
     m_odometry = new DifferentialDriveOdometry(
         m_gyro.getRotation2d(), m_leftEncoder.getPosition(), m_rightEncoder.getPosition());
-    SmartDashboard.putData("Field", m_field);
+    Shuffleboard.getTab("Field").add("Field", m_field);
+
   }
 
   @Override
   public void periodic() {
     // Update the odometry in the periodic block
     m_odometry.update(
-      getGyroRotation2d(), m_leftEncoder.getPosition(), m_rightEncoder.getPosition());
-    SmartDashboard.putNumber("Left Encoder",m_leftEncoder.getPosition()); // Units.metersToInches(m_leftEncoder.getPosition()));
+        getGyroRotation2d(), m_leftEncoder.getPosition(), m_rightEncoder.getPosition());
+    SmartDashboard.putNumber("Left Encoder", m_leftEncoder.getPosition()); // Units.metersToInches(m_leftEncoder.getPosition()));
     SmartDashboard.putNumber("Right Encoder", m_rightEncoder.getPosition()); // Units.metersToInches(m_rightEncoder.getPosition()));
     SmartDashboard.putNumber("Average Distance",
         Units.metersToInches((m_rightEncoder.getPosition() + m_leftEncoder.getPosition()) / 2));
     SmartDashboard.putData("Gyro", m_gyro);
     SmartDashboard.putNumber("Gyro.getHeading", this.getGyroRotation2d().getDegrees());
     m_field.setRobotPose(m_odometry.getPoseMeters());
+    ShuffleboardLayout gyro = Shuffleboard.getTab("Gyro").getLayout("Gyro", BuiltInLayouts.kList)
+        .withSize(3, 6);
+    Shuffleboard.getTab("Gyro").add("Gyro", m_gyro).withPosition(4, 0);
+    gyro.add("Rotation2d.fromDegrees(360.0 - m_gyro.getYaw() * -1).minus(m_gyroOffset).getDegrees",
+        this.getGyroRotation2d().getDegrees());
+    gyro.add("getYaw", m_gyro.getYaw());
+    gyro.add("getAngle", m_gyro.getAngle());
+    gyro.add("getAngleAdjustment", m_gyro.getAngleAdjustment());
+    gyro.add("m_gyroOffset.getDegrees()", m_gyroOffset.getDegrees());
+
   }
 
   /**
@@ -118,7 +136,7 @@ public class DriveSubsystem extends SubsystemBase {
     resetEncoders();
     zeroHeading(pose.getRotation());
     m_odometry.resetPosition(
-      getGyroRotation2d(), m_leftEncoder.getPosition(), m_rightEncoder.getPosition(), pose);
+        getGyroRotation2d(), m_leftEncoder.getPosition(), m_rightEncoder.getPosition(), pose);
   }
 
   /**
@@ -199,7 +217,7 @@ public class DriveSubsystem extends SubsystemBase {
    */
   public Rotation2d getGyroRotation2d() {
     return Rotation2d.fromDegrees(360.0 - m_gyro.getYaw() * -1).minus(m_gyroOffset);
-}
+  }
 
   /**
    * Returns the turn rate of the robot.
@@ -212,6 +230,7 @@ public class DriveSubsystem extends SubsystemBase {
 
   public Command followTrajectoryCommand(PathPlannerTrajectory traj, boolean isFirstPath) {
     SmartDashboard.putNumber("intial Pose rotation", traj.getInitialPose().getRotation().getDegrees());
+    m_field.getObject("traj").setTrajectory(traj);
     return new SequentialCommandGroup(
         new InstantCommand(() -> {
           // Reset odometry for the first path you run during auto
