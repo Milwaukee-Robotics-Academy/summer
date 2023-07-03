@@ -103,6 +103,7 @@ public class DriveSubsystem extends SubsystemBase {
     gyro.add("Rotation2d.fromDegrees(360.0 - m_gyro.getYaw() * -1).minus(m_gyroOffset).getDegrees",
         this.getGyroRotation2d().getDegrees());
     gyro.add("getYaw", m_gyro.getYaw());
+    gyro.add("getYaw through rotation2d", Rotation2d.fromDegrees(m_gyro.getYaw()).getDegrees());
     gyro.add("getAngle", m_gyro.getAngle());
     gyro.add("getAngleAdjustment", m_gyro.getAngleAdjustment());
     gyro.add("m_gyroOffset.getDegrees()", m_gyroOffset.getDegrees());
