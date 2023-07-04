@@ -46,26 +46,15 @@ public class RobotContainer {
 
     private final JoystickButton intakeOut = new JoystickButton(m_driverController, XboxController.Button.kY.value);
 
-    private final ArrayList<PathPlannerTrajectory> autoPathGroup;
-    private final RamseteAutoBuilder autoBuilder;
-    private final HashMap<String, Command> eventMap;
+    private ArrayList<PathPlannerTrajectory> autoPathGroup;
+    private HashMap<String, Command> eventMap;
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
     public RobotContainer() {
 
-        // This will load the file "Example Path.path" and generate it with a max
-        // velocity of 4 m/s and a max acceleration of 3 m/s^2
-        autoPathGroup = PathPlanner.loadPathGroup("ReversePath", new PathConstraints(3, 2));
-
-        // This is just an example event map. It would be better to have a constant,
-        // global event map
-        // in your code that will be used by all path following commands.
-        eventMap = new HashMap<>();
-        eventMap.put("marker1", new PrintCommand("Passed marker 1"));
-        eventMap.put("intakeOut", new IntakeOut(m_intake).withTimeout(2));
-
+     
         // m_robotDrive.resetOdometry(examplePath.getInitialPose());
         // Configure the button bindings
         configureButtonBindings();
@@ -120,7 +109,15 @@ public class RobotContainer {
     }
 
     public void autonomousInit() {
-        PathPlannerServer.startServer(5811);
+   // This will load the file "Example Path.path" and generate it with a max
+        autoPathGroup =  (ArrayList<PathPlannerTrajectory>) PathPlanner.loadPathGroup("ReversePath", true, new PathConstraints(3, 2));
+        // This is just an example event map. It would be better to have a constant,
+        // global event map
+        // in your code that will be used by all path following commands.
+        eventMap = new HashMap<>();
+        eventMap.put("marker1", new PrintCommand("Passed marker 1"));
+        eventMap.put("intakeOut", new IntakeOut(m_intake).withTimeout(2));
+
         // m_robotDrive.resetEncoders();
     }
 
