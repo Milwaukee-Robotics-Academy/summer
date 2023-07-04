@@ -72,6 +72,8 @@ public class RobotContainer {
         m_intake.setDefaultCommand(
                 new RunCommand(
                         () -> m_intake.stop(), m_intake));
+        m_robotDrive.resetOdometry(PathPlanner.loadPathGroup("ReversePath", true, new PathConstraints(3, 2)).get(0).getInitialPose());
+        
     }
 
     /**
