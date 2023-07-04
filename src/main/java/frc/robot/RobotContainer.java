@@ -49,7 +49,8 @@ public class RobotContainer {
 
                 // This will load the file "Example Path.path" and generate it with a max
         // velocity of 4 m/s and a max acceleration of 3 m/s^2
-        examplePath = PathPlanner.loadPath("ExamplePath", new PathConstraints(3, 2));
+        PathPlanner.getConstraintsFromPath(null)
+        examplePath = PathPlanner.loadPath("ReversePath", new PathConstraints(3, 2),true);
         m_robotDrive.resetOdometry(examplePath.getInitialPose());
         // Configure the button bindings
         configureButtonBindings();
