@@ -103,16 +103,15 @@ public class DriveSubsystem extends SubsystemBase {
 
   private void getGyroData() {
 
-    ShuffleboardLayout gyro = Shuffleboard.getTab("Gyro").getLayout("Gyro", BuiltInLayouts.kList)
-        .withSize(3, 6);
-    Shuffleboard.getTab("Gyro").add("Gyro", m_gyro).withPosition(4, 0);
-    gyro.add("Rotation2d.fromDegrees(360.0 - m_gyro.getYaw() * -1).minus(m_gyroOffset).getDegrees",
+   
+    SmartDashboard.putData("Gyro", m_gyro);
+    SmartDashboard.putNumber("getGyroRotation2d",
         this.getGyroRotation2d().getDegrees());
-    gyro.add("getYaw", m_gyro.getYaw());
-    gyro.add("getYaw through rotation2d", Rotation2d.fromDegrees(m_gyro.getYaw()).getDegrees());
-    gyro.add("getAngle", m_gyro.getAngle());
-    gyro.add("getAngleAdjustment", m_gyro.getAngleAdjustment());
-    gyro.add("m_gyroOffset.getDegrees()", m_gyroOffset.getDegrees());
+        SmartDashboard.putNumber("getYaw", m_gyro.getYaw());
+        SmartDashboard.putNumber("getYaw through rotation2d", Rotation2d.fromDegrees(m_gyro.getYaw()).getDegrees());
+        SmartDashboard.putNumber("getAngle", m_gyro.getAngle());
+        SmartDashboard.putNumber("getAngleAdjustment", m_gyro.getAngleAdjustment());
+        SmartDashboard.putNumber("m_gyroOffset.getDegrees()", m_gyroOffset.getDegrees());
 
      /* Display 6-axis Processed Angle Data                                      */
      SmartDashboard.putBoolean(  "IMU_Connected",        m_gyro.isConnected());
@@ -299,7 +298,7 @@ public class DriveSubsystem extends SubsystemBase {
    * @return the robot's heading
    */
   public Rotation2d getGyroRotation2d() {
-    return Rotation2d.fromDegrees(360.0 - m_gyro.getYaw() * -1).minus(m_gyroOffset);
+    return Rotation2d.fromDegrees(-m_gyro.getAngle()).minus(m_gyroOffset);
   }
 
   /**
