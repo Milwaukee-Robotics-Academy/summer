@@ -4,8 +4,13 @@
 
 package frc.robot.subsystems;
 
+import java.util.HashMap;
+import java.util.List;
+
 import com.kauailabs.navx.frc.AHRS;
 import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.auto.PIDConstants;
+import com.pathplanner.lib.auto.RamseteAutoBuilder;
 import com.pathplanner.lib.commands.PPRamseteCommand;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
@@ -310,36 +315,40 @@ public class DriveSubsystem extends SubsystemBase {
     return -m_gyro.getRate();
   }
 
-  public Command followTrajectoryCommand(PathPlannerTrajectory traj, boolean isFirstPath) {
-    SmartDashboard.putNumber("intial Pose rotation", traj.getInitialPose().getRotation().getDegrees());
-    m_field.getObject("traj").setTrajectory(traj);
-    return new SequentialCommandGroup(
-        new InstantCommand(() -> {
-          // Reset odometry for the first path you run during auto
-          if (isFirstPath) {
-            this.resetOdometry(traj.getInitialPose());
-          }
-        }),
-        new PPRamseteCommand(
-            traj,
-            this::getPose, // Pose supplier
-            new RamseteController(),
-            new SimpleMotorFeedforward(Constants.DriveConstants.kS, Constants.DriveConstants.kV,
-                Constants.DriveConstants.kA),
-            Constants.DriveConstants.kDriveKinematics, // DifferentialDriveKinematics
-            this::getWheelSpeeds, // DifferentialDriveWheelSpeeds supplier
-            new PIDController(Constants.DriveConstants.kP, 0, Constants.DriveConstants.kD), // Left controller. Tune
-                                                                                            // these values for your
-                                                                                            // robot. Leaving them 0
-                                                                                            // will only use
-                                                                                            // feedforwards.
-            new PIDController(Constants.DriveConstants.kP, 0, Constants.DriveConstants.kD), // Right controller (usually
-                                                                                            // the same values as left
-                                                                                            // controller)
-            this::tankDriveVolts, // Voltage biconsumer
-            true, // Should the path be automatically mirrored depending on alliance color.
-                  // Optional, defaults to true
-            this // Requires this drive subsystem
-        ));
+  public Command followTrajectoryCommand(ArrayList<PathPlannerTrajectory> path, HashMap<String, Command> eventMap, boolean isFirstPath) {
+    SmartDashboard.putNumber("intial Pose rotation", path[0].getInitialPose().getRotation().getDegrees());
+    m_field.getObject("traj").setTrajectory(path[0]);
+
+    // Create the AutoBuilder. This only needs to be created once when robot code starts, not every time you want to create an auto command. A good place to put this is in RobotContainer along with your subsystems.
+    RamseteAutoBuilder autoBuilder = new RamseteAutoBuilder(
+  this::getPose, // Pose2d supplier
+  this::resetOdometry, // Pose2d consumer, used to reset odometry at the beginning of auto
+  new RamseteController(),
+  this.kinematics,
+  new SimpleMotorFeedforward(Constants.DriveConstants.kS, Constants.DriveConstants.kV,
+      Constants.DriveConstants.kA),
+  // DifferentialDriveKinematics
+  this::getWheelSpeeds, // DifferentialDriveWheelSpeeds supplier
+  new PIDConstants(Constants.DriveConstants.kP, 0, Constants.DriveConstants.kD), // Left controller. Tune
+                                                                                  // these values for your
+                                                                                  // robot. Leaving them 0
+                                                                                  // will only use
+                                                                                  // feedforwards.
+   this::tankDriveVolts, // Voltage biconsumer
+   eventMap,
+  true, // Should the path be automatically mirrored depending on alliance color.
+        // Optional, defaults to true
+  this // Requires this drive subsystem
+    );
+
+    return autoBuilder.fullAuto(path);
+    // return new SequentialCommandGroup(
+    //     new InstantCommand(() -> {
+    //       // Reset odometry for the first path you run during auto
+    //       if (isFirstPath) {
+    //         this.resetOdometry(path[0].getInitialPose());
+    //       }
+    //     }),
+    //     autoBuilder.fullAuto(path));
   }
 }

@@ -6,6 +6,10 @@ package frc.robot;
 
 import static edu.wpi.first.wpilibj.XboxController.Button;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.IntakeIn;
@@ -14,13 +18,14 @@ import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.Intake;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.auto.RamseteAutoBuilder;
 import com.pathplanner.lib.server.PathPlannerServer;
-
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -35,23 +40,33 @@ public class RobotContainer {
     // The robot's subsystems
     private final DriveSubsystem m_robotDrive = new DriveSubsystem();
     private final Intake m_intake = new Intake();
-      // The driver's controller
+    // The driver's controller
     XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
     private final JoystickButton intakeIn = new JoystickButton(m_driverController, XboxController.Button.kX.value);
 
     private final JoystickButton intakeOut = new JoystickButton(m_driverController, XboxController.Button.kY.value);
 
-    private final PathPlannerTrajectory examplePath;
+    private final ArrayList<PathPlannerTrajectory> autoPathGroup;
+    private final RamseteAutoBuilder autoBuilder;
+    private final HashMap<String, Command> eventMap;
+
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
     public RobotContainer() {
 
-                // This will load the file "Example Path.path" and generate it with a max
+        // This will load the file "Example Path.path" and generate it with a max
         // velocity of 4 m/s and a max acceleration of 3 m/s^2
-        PathPlanner.getConstraintsFromPath(null)
-        examplePath = PathPlanner.loadPath("ReversePath", new PathConstraints(3, 2),true);
-        m_robotDrive.resetOdometry(examplePath.getInitialPose());
+        autoPathGroup = PathPlanner.loadPathGroup("ReversePath", new PathConstraints(3, 2));
+
+        // This is just an example event map. It would be better to have a constant,
+        // global event map
+        // in your code that will be used by all path following commands.
+        eventMap = new HashMap<>();
+        eventMap.put("marker1", new PrintCommand("Passed marker 1"));
+        eventMap.put("intakeOut", new IntakeOut(m_intake).withTimeout(2));
+
+        // m_robotDrive.resetOdometry(examplePath.getInitialPose());
         // Configure the button bindings
         configureButtonBindings();
 
@@ -62,12 +77,12 @@ public class RobotContainer {
                 // hand, and turning controlled by the right.
                 new RunCommand(
                         () -> m_robotDrive.arcadeDrive(
-                            m_driverController.getRightTriggerAxis() - m_driverController.getLeftTriggerAxis(), -m_driverController.getLeftX()*.6),
+                                m_driverController.getRightTriggerAxis() - m_driverController.getLeftTriggerAxis(),
+                                -m_driverController.getLeftX() * .6),
                         m_robotDrive));
         m_intake.setDefaultCommand(
-            new RunCommand(
-                () -> m_intake.stop() , m_intake)
-        );
+                new RunCommand(
+                        () -> m_intake.stop(), m_intake));
     }
 
     /**
@@ -86,7 +101,7 @@ public class RobotContainer {
                 .onFalse(new InstantCommand(() -> m_robotDrive.setMaxOutput(1)));
         intakeIn.whileTrue(new IntakeIn(m_intake));
         intakeOut.whileTrue(new IntakeOut(m_intake));
-        
+
     }
 
     /**
@@ -99,17 +114,17 @@ public class RobotContainer {
         // This trajectory can then be passed to a path follower such as a
         // PPRamseteCommand
 
-
         // Run path following command, then stop at the end.
-        return new IntakeOut(m_intake).withTimeout(2).andThen(m_robotDrive.followTrajectoryCommand(examplePath, true).andThen(() -> m_robotDrive.tankDriveVolts(0, 0)));
+        return m_robotDrive.followTrajectoryCommand(autoPathGroup, eventMap, true)
+                .andThen(() -> m_robotDrive.tankDriveVolts(0, 0));
     }
 
-    public void autonomousInit(){
+    public void autonomousInit() {
         PathPlannerServer.startServer(5811);
-     //   m_robotDrive.resetEncoders();
+        // m_robotDrive.resetEncoders();
     }
 
-    public void teleopInit(){
+    public void teleopInit() {
         m_robotDrive.resetEncoders();
     }
 }
