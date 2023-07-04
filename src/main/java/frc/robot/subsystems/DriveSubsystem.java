@@ -114,8 +114,8 @@ public class DriveSubsystem extends SubsystemBase {
         .withPosition(0, 0);
 
     navXData.add("Gyro", m_gyro)
-      .withPosition(3, 0)
-      .withSize(2, 2);
+        .withPosition(3, 0)
+        .withSize(2, 2);
     navXData.addDouble("getGyroRotation2d", this::getGyroRotation2dDegrees);
     navXData.addFloat("getYaw", m_gyro::getYaw);
     navXData.addDouble("getAngle", m_gyro::getAngle);
@@ -169,7 +169,7 @@ public class DriveSubsystem extends SubsystemBase {
     navXData.addDouble("RawGyro_Y", m_gyro::getRawGyroY);
     navXData.addDouble("RawGyro_Z", m_gyro::getRawGyroZ);
     navXData.addDouble("RawAccel_X", m_gyro::getRawAccelX);
-   // navXData.addDouble("RawAccel_Y", m_gyro::getRawAccelY);
+    // navXData.addDouble("RawAccel_Y", m_gyro::getRawAccelY);
     navXData.addDouble("RawAccel_Z", m_gyro::getRawAccelZ);
     navXData.addDouble("RawMag_X", m_gyro::getRawMagX);
     navXData.addDouble("RawMag_Y", m_gyro::getRawMagY);
