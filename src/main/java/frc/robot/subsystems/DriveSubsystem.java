@@ -68,8 +68,6 @@ public class DriveSubsystem extends SubsystemBase {
     m_gyro = new AHRS(SPI.Port.kMXP);
     m_leftMotor.restoreFactoryDefaults();
     m_rightMotor.restoreFactoryDefaults();
-    m_leftMotor.setIdleMode(IdleMode.kBrake);
-    m_rightMotor.setIdleMode(IdleMode.kBrake);
     m_rightMotor.setInverted(true);
 
     m_rightMotor.setOpenLoopRampRate(0.4);
@@ -246,6 +244,16 @@ public class DriveSubsystem extends SubsystemBase {
     m_drive.feed();
   }
 
+  /**
+ * Sets idle mode to be either brake mode or coast mode.
+ *
+ * @param brake If true, sets brake mode, otherwise sets coast mode
+ */
+public void setBrakeMode(boolean brake) {
+  IdleMode mode = brake ? IdleMode.kBrake : IdleMode.kCoast;
+  m_leftMotor.setIdleMode(mode);
+  m_rightMotor.setIdleMode(mode);
+}
   /** Resets the drive encoders to currently read a position of 0. */
   public void resetEncoders() {
     m_leftEncoder.setPosition(0.0);

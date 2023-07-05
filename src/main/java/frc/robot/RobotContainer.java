@@ -22,6 +22,8 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+
 import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
@@ -38,7 +40,7 @@ import com.pathplanner.lib.server.PathPlannerServer;
  */
 public class RobotContainer {
     // The robot's subsystems
-    private final DriveSubsystem m_robotDrive = new DriveSubsystem();
+    final DriveSubsystem m_robotDrive = new DriveSubsystem();
     private final Intake m_intake = new Intake();
     // The driver's controller
     XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
@@ -62,7 +64,7 @@ public class RobotContainer {
         // m_robotDrive.resetOdometry(examplePath.getInitialPose());
         // Configure the button bindings
         configureButtonBindings();
-
+        configureTriggers();
         // Configure default commands
         // Set the default drive command to split-stick arcade drive
         m_robotDrive.setDefaultCommand(
@@ -98,7 +100,9 @@ public class RobotContainer {
         intakeOut.whileTrue(new IntakeOut(m_intake));
 
     }
+    private void configureTriggers() {
 
+    }
     /**
      * Use this to pass the autonomous command to the main {@link Robot} class.
      *
@@ -115,6 +119,7 @@ public class RobotContainer {
     }
 
     public void autonomousInit() {
+        m_robotDrive.setBrakeMode(true);
    // This will load the file "Example Path.path" and generate it with a max
         autoPathGroup =  (ArrayList<PathPlannerTrajectory>) PathPlanner.loadPathGroup("ReversePath", true, new PathConstraints(3, 2));
         // This is just an example event map. It would be better to have a constant,
@@ -128,6 +133,7 @@ public class RobotContainer {
     }
 
     public void teleopInit() {
+        m_robotDrive.setBrakeMode(true);
         m_robotDrive.resetEncoders();
     }
 }
