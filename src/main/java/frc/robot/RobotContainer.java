@@ -50,7 +50,7 @@ public class RobotContainer {
 
     // Creates a SlewRateLimiter that limits the rate of change of the signal to 0.5
     // units per second
-    SlewRateLimiter filter = new SlewRateLimiter(0.5);
+    SlewRateLimiter filter = new SlewRateLimiter(1);
 
     private ArrayList<PathPlannerTrajectory> autoPathGroup;
     private HashMap<String, Command> eventMap;
