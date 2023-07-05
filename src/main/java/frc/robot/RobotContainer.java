@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.IntakeIn;
@@ -29,10 +30,9 @@ import com.pathplanner.lib.server.PathPlannerServer;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
- * Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in
- * the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of
+ * Command-based is a "declarative" paradigm, very little robot logic 
+ * should actually be handled in the {@link Robot} periodic methods 
+ * (other than the scheduler calls). Instead, the structure of
  * the robot (including
  * subsystems, commands, and button mappings) should be declared here.
  */
@@ -45,6 +45,10 @@ public class RobotContainer {
     private final JoystickButton intakeIn = new JoystickButton(m_driverController, XboxController.Button.kX.value);
 
     private final JoystickButton intakeOut = new JoystickButton(m_driverController, XboxController.Button.kY.value);
+
+    // Creates a SlewRateLimiter that limits the rate of change of the signal to 0.5
+    // units per second
+    SlewRateLimiter filter = new SlewRateLimiter(0.5);
 
     private ArrayList<PathPlannerTrajectory> autoPathGroup;
     private HashMap<String, Command> eventMap;
@@ -66,8 +70,8 @@ public class RobotContainer {
                 // hand, and turning controlled by the right.
                 new RunCommand(
                         () -> m_robotDrive.arcadeDrive(
-                                m_driverController.getRightTriggerAxis() - m_driverController.getLeftTriggerAxis(),
-                                -m_driverController.getLeftX() * .6),
+                                filter.calculate(m_driverController.getRightTriggerAxis() - m_driverController.getLeftTriggerAxis()),
+                                -m_driverController.getLeftX() * .5),
                         m_robotDrive));
         m_intake.setDefaultCommand(
                 new RunCommand(
