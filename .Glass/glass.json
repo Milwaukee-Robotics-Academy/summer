@@ -10,6 +10,7 @@
     },
     "types": {
       "/FMSInfo": "FMSInfo",
+      "/Shuffleboard/Field/Field": "Field2d",
       "/SmartDashboard/Field": "Field2d",
       "/SmartDashboard/Gyro": "Gyro"
     }
