@@ -127,7 +127,8 @@ public class RobotContainer {
         // in your code that will be used by all path following commands.
         eventMap = new HashMap<>();
         eventMap.put("marker1", new PrintCommand("Passed marker 1"));
-        eventMap.put("intakeOut", new IntakeOut(m_intake).withTimeout(2));
+        eventMap.put("intakeOut", new IntakeOut(m_intake).withTimeout(0.3));
+        eventMap.put("intakeIn", new IntakeIn(m_intake).withTimeout(1));
 
         // m_robotDrive.resetEncoders();
     }
