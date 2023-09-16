@@ -200,7 +200,9 @@ public class DriveSubsystem extends SubsystemBase {
   public Pose2d getPose() {
     return m_odometry.getPoseMeters();
   }
-
+  public double getPitch() {
+    return m_gyro.getPitch();
+  }
   /**
    * Returns the current wheel speeds of the robot.
    *
