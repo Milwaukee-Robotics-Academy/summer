@@ -17,6 +17,7 @@ import frc.robot.commands.IntakeIn;
 import frc.robot.commands.IntakeOut;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Vision;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
@@ -42,6 +43,7 @@ public class RobotContainer {
     // The robot's subsystems
     final DriveSubsystem m_robotDrive = new DriveSubsystem();
     private final Intake m_intake = new Intake();
+    private final Vision m_vision = new Vision();
     // The driver's controller
     XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
     private final JoystickButton intakeIn = new JoystickButton(m_driverController, XboxController.Button.kX.value);
@@ -98,6 +100,13 @@ public class RobotContainer {
                 .onFalse(new InstantCommand(() -> m_robotDrive.setMaxOutput(1)));
         intakeIn.whileTrue(new IntakeIn(m_intake));
         intakeOut.whileTrue(new IntakeOut(m_intake));
+
+        new JoystickButton(m_driverController, Button.kA.value)
+            .whileTrue(new RunCommand(
+                () -> m_robotDrive.arcadeDrive(
+                        filter.calculate(m_driverController.getRightTriggerAxis() - m_driverController.getLeftTriggerAxis()),
+                         m_vision.getBestTargetError()),
+                m_robotDrive));
 
     }
     private void configureTriggers() {
